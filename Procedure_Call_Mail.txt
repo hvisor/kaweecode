@@ -1,0 +1,53 @@
+create or replace PROCEDURE      NYG_Daily_AUTO_ALERT_APP_PE IS
+nb_cnt_sub number;
+nb_total_gmt number;
+nb_ttl_allowance number;
+nb_po number;
+nb_po_doc_no varchar2(50);
+nb_pr number;
+nb_pr_doc_no  varchar2(50);
+WKMESSAGE VARCHAR2(50);
+NB_TTL_USAGE NUMBER;
+WKEMAIL VARCHAR2(80);
+WKITEM_NO VARCHAR2(1500);
+WKSO_NO_DOC VARCHAR2(20000);
+WKCOUNT NUMBER;
+appdate1  VARCHAR2(20000);
+appdate2  VARCHAR2(20000);
+timec varchar2(50);
+BEGIN
+
+
+BEGIN
+SELECT COUNT(*) INTO WKCOUNT  from V_AUTO_ALERT_APP_PE
+where
+APP_DATE >=to_date(to_char(sysdate-1,'dd/mm/yyyy'),'dd/mm/yyyy')
+--APP_DATE >=to_date(to_char('01/05/2021','dd/mm/yyyy'),'dd/mm/yyyy')
+;
+EXCEPTION
+WHEN NO_DATA_FOUND THEN
+WKCOUNT:=0;
+END;
+
+IF NVL(WKCOUNT,0)>0 THEN
+begin
+EXPORT_AUTO_ALERT_APP_PE('MAIL','AUTO_ALERT_APP_PE'||'.csv');
+end; 
+
+begin 
+              sys.mail_files('warning_alert@nanyangtextile.com',GET_EMAIL_ALERT_AUTO('N03','APP_PE_ALERT','TO'),GET_EMAIL_ALERT_AUTO('N03','APP_PE_ALERT','CC')
+             ,'Auto email notify merchandise  approved P/E    on soft square system  '||to_char(sysdate,'dd/mm/yyyy')||' time '||TO_CHAR(sysdate, 'HH24:MI:SS'),'Dear '||'K.TIP'||','||'K.NEE'
+              ||CHR(10)||CHR(10)||
+              '     Auto email notify merchandise  approved  P/E    on soft square system  '||to_char(sysdate-1,'dd/mm/yyyy')||'. Please see detail the attached file.'
+              ||CHR(10)||CHR(10)||
+              'Faithfully yours,'
+              ||CHR(10)||
+              'This email is auto-generated on soft square system. Please do not reply.'
+                 ,'MAIL','AUTO_ALERT_APP_PE'||'.csv');
+end; 
+END IF;
+
+
+
+
+END;
